@@ -28,17 +28,6 @@ public class ConnectFour {
         C4Controller.GameState currState = C4Controller.GameState.WAITING;
         BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
         gameController.joinGame();
-
-        // Put game logic here
-        while (!isGameSessionOver(gameController));
-    }
-
-    private static boolean isGameSessionOver (C4Controller gameController) {
-        if (!gameController.isGameConnected()) {
-            System.out.println("Opponent has disconnected...");
-            return true;
-        }
-        return false;
     }
 
     /**

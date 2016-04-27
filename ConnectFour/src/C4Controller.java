@@ -40,7 +40,6 @@ public class C4Controller {
     }
 
     public GameState processMessage (String message) {
-        System.out.println(message);
         String protocol[] = message.split(" ");
         String srvrMsg = protocol[0];
 
@@ -91,6 +90,7 @@ public class C4Controller {
         }
 
         if (srvrMsg.equals(C4Messages.CONNECTION_CLOSED)) {
+
             System.exit(0);
         }
 
@@ -119,9 +119,10 @@ public class C4Controller {
     private class ReaderThread extends Thread {
         public void run () {
             try {
-                while (true) {
+                while (isGameConnected()) {
                     currGameState = processMessage(waitForGameMessage());
                 }
+                processMessage(C4Messages.CONNECTION_CLOSED);
             } catch (IOException e) {
                 System.err.println(e);
             } finally {

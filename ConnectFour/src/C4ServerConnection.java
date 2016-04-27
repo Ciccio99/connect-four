@@ -13,13 +13,10 @@ public class C4ServerConnection {
 
     public C4ServerConnection(String host, int port) throws Exception {
         SocketAddress sock_addr = new InetSocketAddress(host, port);
-
         socket = new Socket();
         socket.connect(sock_addr);
-
         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         out = new PrintWriter(socket.getOutputStream(), true);
-        BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
     }
 
     public String receiveMessage () throws IOException {
@@ -32,7 +29,7 @@ public class C4ServerConnection {
                 received_message = in.readLine();
             }
         }
-
+        System.out.println(received_message);
         return received_message;
     }
 

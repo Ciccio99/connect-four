@@ -85,7 +85,6 @@ public class C4UI
         // Clicking the Connect Four panel informs the view listener.
         boardPanel.addMouseListener (new MouseAdapter() {
             public void mouseClicked (MouseEvent e) {
-                System.out.println("I CLIKED add");
                 int c = boardPanel.clickToColumn (e);
                 try {
                     viewController.addPiece(c);
@@ -98,8 +97,6 @@ public class C4UI
         // Clicking the New Game button informs the view listener.
         newGameButton.addActionListener (new ActionListener() {
             public void actionPerformed (ActionEvent e) {
-                System.out.println("I CLIKED cleer");
-
                 try {
                     viewController.clearBoard();
                 } catch (Exception exc) {
