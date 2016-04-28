@@ -1,5 +1,9 @@
 /**
- * Created by alberto on 4/26/16.
+ * Maintains common messages frequently used through the connect four game to
+ * communicate with the server back and forth.
+ *
+ * @author Alberto Scicali
+ * @version 0.1.0
  */
 public class C4Messages {
 

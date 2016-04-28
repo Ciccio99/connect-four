@@ -28,6 +28,7 @@ public class C4UI
     private C4Panel boardPanel;
     private JTextField message;
     private JButton newGameButton;
+    private C4ViewController viewController;
 
     public void repaintBoard () {
         boardPanel.repaint();
@@ -51,6 +52,7 @@ public class C4UI
      */
     public C4UI (C4BoardIntf board, String name, C4ViewController viewController) {
         c4board = board;
+        this.viewController = viewController;
 
         // Set up window.
         frame = new JFrame ("Connect Four -- " + name);

@@ -1,9 +1,11 @@
-import javax.sound.midi.SysexMessage;
 import java.io.IOException;
-import java.net.Socket;
 
 /**
- * Created by alberto on 4/25/16.
+ * Connect Four central controller that talks between most components.
+ * Also the gateway controller to access read messages and to send messages.
+ *
+ * @author Alberto Scicali
+ * @version 0.1.0
  */
 public class C4Controller {
 
@@ -31,7 +33,6 @@ public class C4Controller {
 
     public void joinGame () throws Exception {
         gameService.sendMessage(C4Messages.JOIN + " " + playerName);
-        System.out.println(C4Messages.JOIN + " " + playerName);
         new ReaderThread() .start();
     }
 
@@ -57,7 +58,7 @@ public class C4Controller {
         if (srvrMsg.equals(C4Messages.TURN)) {
             modelController.activateClearButton();
             int pNum = Integer.parseInt(protocol[1]);
-            if (pNum == 0) {
+            if (pNum == 0 || modelController.isBoardFull()) {
                 modelController.changeViewMessage("Game over");
                 return GameState.GAME_OVER;
             } else if (pNum == playerNum) {

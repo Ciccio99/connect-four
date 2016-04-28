@@ -1,5 +1,8 @@
 /**
- * Created by alberto on 4/26/16.
+ * Main running class for the Connect Four game.
+ *
+ * @author Alberto Scicali
+ * @version 0.1.0
  */
 public class C4ModelController {
     C4Model gameModel;
@@ -20,6 +23,7 @@ public class C4ModelController {
 
     public void clearBoard () {
         gameModel.clearBoard();
+
         gameView.repaintBoard();
     }
 
@@ -29,5 +33,9 @@ public class C4ModelController {
 
     public void activateClearButton () {
         gameView.activateNewGameButton();
+    }
+
+    public boolean isBoardFull () {
+        return gameModel.checkForBoardFill();
     }
 }

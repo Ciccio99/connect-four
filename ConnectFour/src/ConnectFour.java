@@ -1,8 +1,10 @@
 import java.io.*;
-import java.net.Socket;
 
 /**
- * Created by alberto on 4/24/16.
+ * Main running class for the Connect Four game.
+ *
+ * @author Alberto Scicali
+ * @version 0.1.0
  */
 public class ConnectFour {
 
@@ -25,7 +27,6 @@ public class ConnectFour {
 
     public static void beginGame (C4Controller gameController) throws Exception {
         C4Model gameModel = new C4Model();
-        C4Controller.GameState currState = C4Controller.GameState.WAITING;
         BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
         gameController.joinGame();
     }

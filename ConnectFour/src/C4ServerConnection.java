@@ -4,7 +4,11 @@ import java.net.Socket;
 import java.net.SocketAddress;
 
 /**
- * Created by alberto on 4/25/16.
+ * Server service that enables socket connection to a given host and port.
+ * Also capable to receive and send messaged over the protocol
+ *
+ * @author Alberto Scicali
+ * @version 0.1.0
  */
 public class C4ServerConnection {
     private Socket socket;
@@ -23,13 +27,11 @@ public class C4ServerConnection {
         String received_message = null;
         while (received_message == null) {
             if (isSocketClosed()) {
-                System.out.println("CONNECTION HAS CLOSED!");
                 received_message = C4Messages.CONNECTION_CLOSED;
             } else {
                 received_message = in.readLine();
             }
         }
-        System.out.println(received_message);
         return received_message;
     }
 
