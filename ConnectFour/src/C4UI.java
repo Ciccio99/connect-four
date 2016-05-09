@@ -30,14 +30,24 @@ public class C4UI
     private JButton newGameButton;
     private C4ViewController viewController;
 
+    /**
+     * Informs the board panel to repaint the board
+     */
     public void repaintBoard () {
         boardPanel.repaint();
     }
 
+    /**
+     * Changes the text field message to the given message
+     * @param message Message that updates the field
+     */
     public void changeMessage (String message) {
         this.message.setText(message);
     }
 
+    /**
+     * Activates the new game button on the UI so that it is clickable
+     */
     public void activateNewGameButton () {
         newGameButton.setEnabled(true);
     }
@@ -49,6 +59,7 @@ public class C4UI
      *
      * @param  board  Connect Four board.
      * @param  name   Player's name.
+     * @param viewController the view controller
      */
     public C4UI (C4BoardIntf board, String name, C4ViewController viewController) {
         c4board = board;
@@ -97,13 +108,11 @@ public class C4UI
         });
 
         // Clicking the New Game button informs the view listener.
-        newGameButton.addActionListener (new ActionListener() {
-            public void actionPerformed (ActionEvent e) {
-                try {
-                    viewController.clearBoard();
-                } catch (Exception exc) {
-                    System.err.println(exc);
-                }
+        newGameButton.addActionListener (e -> {
+            try {
+                viewController.clearBoard();
+            } catch (Exception exc) {
+                System.err.println(exc);
             }
         });
 

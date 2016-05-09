@@ -10,9 +10,9 @@ import java.io.IOException;
 public class C4Controller {
 
     public int playerNum = 0;
-    public String playerName;
-    public String enemyName;
-    public GameState currGameState;
+    private String playerName;
+    private String enemyName;
+    private GameState currGameState;
     private C4ServerConnection gameService;
     private C4ModelController modelController;
 
@@ -21,77 +21,95 @@ public class C4Controller {
         WAITING, PLAYER_TURN, ENEMY_TURN, GAME_OVER
     }
 
+    /**
+     * Construction of the central game controller
+     * @param playerName Player Name
+     * @param gameService The Server Game Service
+     */
     public C4Controller (String playerName, C4ServerConnection gameService) {
         this.playerName = playerName;
         this.gameService = gameService;
         this.currGameState = GameState.WAITING;
     }
 
+    /**
+     * Gives C4Controller access to the model controller
+     * @param modelController The controller for the model
+     */
     public void addModelController (C4ModelController modelController) {
         this.modelController = modelController;
     }
 
+    /**
+     * Initiates game communication with a server over a socket connection
+     * @throws Exception
+     */
     public void joinGame () throws Exception {
         gameService.sendMessage(C4Messages.JOIN + " " + playerName);
         new ReaderThread() .start();
     }
 
+    /**
+     * Accessor method that returns the current game state
+     * @return GameState enum
+     */
     public GameState getCurrGameState () {
         return this.currGameState;
     }
 
-    public GameState processMessage (String message) {
+    /**
+     * Takes in a message and sends it to the server
+     * @param message
+     * @throws Exception
+     */
+    public void sendGameMessage (String message) throws Exception {
+        gameService.sendMessage(message);
+    }
+
+    /**
+     * Checks if the socket connection is still open.
+     * @return true if socket is open, false otherwise
+     */
+    public boolean isGameConnected () {
+        return !gameService.isSocketClosed();
+    }
+
+    /**
+     * Processes a given message and initiates an action based on the received message.
+     * If the message received is erroneous, an error message is printed and the programe exits.
+     * @param message Message to process
+     * @return GameState enum
+     */
+    private GameState processMessage (String message) {
         String protocol[] = message.split(" ");
         String srvrMsg = protocol[0];
 
         // Number Message
         if (srvrMsg.equals(C4Messages.NUMBER)) {
-            playerNum = Integer.parseInt(protocol[1]);
-            if (playerNum == 1) {
-                return GameState.WAITING;
-            } else {
-                return GameState.ENEMY_TURN;
-            }
+            return processNumberMessage(Integer.parseInt(protocol[1]));
         }
 
         // Turn Message
         if (srvrMsg.equals(C4Messages.TURN)) {
-            modelController.activateClearButton();
-            int pNum = Integer.parseInt(protocol[1]);
-            if (pNum == 0 || modelController.isBoardFull()) {
-                modelController.changeViewMessage("Game over");
-                return GameState.GAME_OVER;
-            } else if (pNum == playerNum) {
-                modelController.changeViewMessage("Your turn");
-                return GameState.PLAYER_TURN;
-            } else {
-                modelController.changeViewMessage(enemyName + "'s turn");
-                return GameState.ENEMY_TURN;
-            }
+            return processTurnMessage(Integer.parseInt(protocol[1]));
         }
 
         // Name message
         if (srvrMsg.equals(C4Messages.NAME)) {
-            if (!protocol[2].equals(playerName)) {
-                enemyName = protocol[2];
-            }
-            return GameState.WAITING;
+            return processNameMessage(protocol[2]);
         }
 
         // Add message
         if (srvrMsg.equals(C4Messages.ADD)) {
-            modelController.addPiece(Integer.parseInt(protocol[1]), Integer.parseInt(protocol[2]), Integer.parseInt(protocol[3]));
-            return GameState.WAITING;
+            return processAddMessage(Integer.parseInt(protocol[1]), Integer.parseInt(protocol[2]), Integer.parseInt(protocol[3]));
         }
 
         // Clear message
         if (srvrMsg.equals(C4Messages.CLEAR)) {
-            modelController.clearBoard();
-            return GameState.GAME_OVER;
+            return processClearMessage();
         }
 
         if (srvrMsg.equals(C4Messages.CONNECTION_CLOSED)) {
-
             System.exit(0);
         }
 
@@ -105,23 +123,86 @@ public class C4Controller {
         return GameState.WAITING;
     }
 
-    public String waitForGameMessage () throws IOException {
-        return gameService.receiveMessage();
+    // Message Processing Functions
+
+    /**
+     * Takes in a number, assigns it as the player number if none is assigned.
+     * @param num Player Number
+     * @return Waiting if you are the fist player, otherwise it is the opponents turn
+     */
+    private GameState processNumberMessage (int num) {
+        if (playerNum == 0 ) {
+            playerNum = num;
+        }
+        if (num == 1) {
+            return GameState.WAITING;
+        }
+        return GameState.ENEMY_TURN;
     }
 
-    public void sendGameMessage (String message) throws Exception {
-        gameService.sendMessage(message);
+    /**
+     * Activates the name game button on the UI, changes the message on the UI and returns a GameState
+     *
+     * @param num Player Number
+     * @return GAME_OVER if turn number == 0, PLAYER_TURN if turn number == playerNumber, otherwise ENEMY_TURN
+     */
+    private GameState processTurnMessage (int num) {
+        modelController.activateClearButton();
+        if (num == 0 || modelController.isBoardFull()) {
+            modelController.changeViewMessage("Game over");
+            return GameState.GAME_OVER;
+        } else if (num == playerNum) {
+            modelController.changeViewMessage("Your turn");
+            return GameState.PLAYER_TURN;
+        } else {
+            modelController.changeViewMessage(enemyName + "'s turn");
+            return GameState.ENEMY_TURN;
+        }
     }
 
-    public boolean isGameConnected () {
-        return !gameService.isSocketClosed();
+    /**
+     * Assigns the enemy name if the given name is not the player's
+     * @param name Player Name
+     * @return WAITING
+     */
+    private GameState processNameMessage (String name) {
+        if (!name.equals(playerName)) {
+            enemyName = name;
+        }
+        return GameState.WAITING;
     }
 
+    /**
+     * Tells a C4ModelController to add a game piece to the board
+     * @param p player number
+     * @param r row
+     * @param c column
+     * @return WAITING
+     *
+     */
+    private GameState processAddMessage (int p, int r, int c) {
+        modelController.addPiece(p, r, c);
+        return GameState.WAITING;
+    }
+
+    /**
+     * Tells a C4ModelController to clear the game board
+     * @return GAME_OVER
+     */
+    private GameState processClearMessage () {
+        modelController.clearBoard();
+        return GameState.GAME_OVER;
+    }
+
+    /**
+     * A thread class that continuously reads a socket's in stream for any new messages
+     * from the connected server
+     */
     private class ReaderThread extends Thread {
         public void run () {
             try {
                 while (isGameConnected()) {
-                    currGameState = processMessage(waitForGameMessage());
+                    currGameState = processMessage(gameService.receiveMessage());
                 }
                 processMessage(C4Messages.CONNECTION_CLOSED);
             } catch (IOException e) {

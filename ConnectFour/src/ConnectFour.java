@@ -1,13 +1,19 @@
 import java.io.*;
 
 /**
- * Main running class for the Connect Four game.
+ * Main running class for the Connect Four game. Orchestrates the initiation of the game and the necessary components.
  *
  * @author Alberto Scicali
  * @version 0.1.0
  */
 public class ConnectFour {
 
+    /**
+     * Main method that starts the application
+     *
+     * @param args Host, Port, Player name
+     * @throws Exception
+     */
     public static void main(String[] args) throws Exception {
         if (args.length != 3) usage();
         String host = args[0];
@@ -25,9 +31,13 @@ public class ConnectFour {
         beginGame(gameController);
     }
 
-    public static void beginGame (C4Controller gameController) throws Exception {
-        C4Model gameModel = new C4Model();
-        BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
+    /**
+     * Initiates the start of the game by informing the game controller to join a server session.
+     *
+     * @param gameController The main game controller
+     * @throws Exception
+     */
+    private static void beginGame (C4Controller gameController) throws Exception {
         gameController.joinGame();
     }
 

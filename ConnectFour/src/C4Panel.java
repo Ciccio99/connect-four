@@ -26,11 +26,11 @@ public class C4Panel
     private static final int D = 48;
     private static final int OFFSET = (W - D)/2;
 
-    private static final Color BG_COLOR = new Color (77, 136, 255);
+    private static final Color BG_COLOR = new Color (255, 0, 97);
     private static final Color NO_COLOR = new Color (230, 230, 230);
-    private static final Color P1_COLOR = new Color (255, 0, 0);
-    private static final Color P2_COLOR = new Color (255, 255, 0);
-    private static final Color WIN_COLOR = new Color (0, 0, 0);
+    private static final Color P1_COLOR = new Color (255, 0, 214);
+    private static final Color P2_COLOR = new Color (0, 231, 255);
+    private static final Color WIN_COLOR = new Color (130, 126, 132);
 
     private static final BasicStroke WIN_STROKE =
             new BasicStroke (D/4, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
