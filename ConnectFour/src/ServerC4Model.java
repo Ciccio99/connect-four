@@ -1,13 +1,10 @@
+import java.io.IOException;
 import java.util.ArrayList;
-
+import java.util.*;
 /**
- * Main connect four model that maintains the current state of the game board.
- *
- * @author  Alan Kaminsky
- * @version 13-Oct-2014
+ * Created by alberto on 5/10/16.
  */
-public class C4Model implements C4BoardIntf {
-
+public class ServerC4Model implements ViewListener {
     /**
      * Number of rows.
      */
@@ -22,12 +19,33 @@ public class C4Model implements C4BoardIntf {
 
     private int[] winnerLine;
 
+    Player player1;
+    Player player2;
+
+    private LinkedList<ViewProxy> viewProxies =
+            new LinkedList<ViewProxy>();
+
     /**
      * Constructor for C4Model, instantiating a new game board.
      */
-    public C4Model () {
+    public ServerC4Model () {
         gameBoard = new int[ROWS][COLS];
         winnerLine = null;
+    }
+
+    /**
+     * Add the given model listener to this C4 model.
+     * @param  proxy Model listener.
+     */
+    public synchronized void addProxy (ViewProxy proxy) {
+        viewProxies.add (proxy);
+    }
+
+    public synchronized void addPlayer (int num, String name) {
+        if (num == 1)
+            player1 = new Player(name, num);
+        else
+            player2 = new Player(name, num);
     }
 
     /**
@@ -36,9 +54,23 @@ public class C4Model implements C4BoardIntf {
      * @param r Row
      * @param c Column
      */
-    public void addPlayerToken (int playerNum, int r, int c) {
+    public synchronized void addPlayerToken (int playerNum, int r, int c) {
         gameBoard[r][c] = playerNum;
         winnerLine = checkForWin(playerNum, r, c);
+        Iterator<ViewProxy> iter = viewProxies.iterator();
+        while (iter.hasNext())
+        {
+            ViewProxy listener = iter.next();
+            try
+            {
+                listener.playerTokenAdded(playerNum, r, c);
+            }
+            catch (IOException exc)
+            {
+                // Client failed, stop reporting to it.
+                iter.remove();
+            }
+        }
     }
 
     /**
@@ -49,12 +81,12 @@ public class C4Model implements C4BoardIntf {
      * @return If win condition, an array with the row and columns of the first game peice and last game piece
      *          that makes up the winning line. If NOT a win condition, return null
      */
-    private int[] checkForWin (int playerNum, int row, int col) {
-        ArrayList<winMarker> aux = new ArrayList<>();
+    private synchronized int[] checkForWin (int playerNum, int row, int col) {
+        ArrayList<ServerC4Model.winMarker> aux = new ArrayList<>();
         // Vertical Check
         for (int r = row - 3; r <= row + 3; r++) {
             if (hasPlayerMarker(playerNum, r, col)) {
-                aux.add(new winMarker(r, col));
+                aux.add(new ServerC4Model.winMarker(r, col));
                 if (aux.size() == 4) {
                     return new int[] {aux.get(0).r, aux.get(0).c, aux.get(3).r, aux.get(3).c};
                 }
@@ -65,7 +97,7 @@ public class C4Model implements C4BoardIntf {
         // Diagonal top-left to bot-Right Check
         for (int i = - 3; i <= 3; i++) {
             if (hasPlayerMarker(playerNum, row + i, col + i)) {
-                aux.add(new winMarker(row + i, col + i));
+                aux.add(new ServerC4Model.winMarker(row + i, col + i));
                 if (aux.size() == 4) {
                     return new int[] {aux.get(0).r, aux.get(0).c, aux.get(3).r, aux.get(3).c};
                 }
@@ -76,7 +108,7 @@ public class C4Model implements C4BoardIntf {
         // Diagonal top-right to bot-left Check
         for (int i = -3; i <= 3; i++) {
             if (hasPlayerMarker(playerNum, row + i, col - i)) {
-                aux.add(new winMarker(row + i, col - i));
+                aux.add(new ServerC4Model.winMarker(row + i, col - i));
                 if (aux.size() == 4) {
                     return new int[] {aux.get(0).r, aux.get(0).c, aux.get(3).r, aux.get(3).c};
                 }
@@ -87,7 +119,7 @@ public class C4Model implements C4BoardIntf {
         // Horizontal Check
         for (int c = col - 3; c <= row + 3; c++) {
             if (hasPlayerMarker(playerNum, row, c)) {
-                aux.add(new winMarker(row, c));
+                aux.add(new ServerC4Model.winMarker(row, c));
                 if (aux.size() == 4) {
                     return new int[] {aux.get(0).r, aux.get(0).c, aux.get(3).r, aux.get(3).c};
                 }
@@ -99,11 +131,36 @@ public class C4Model implements C4BoardIntf {
     }
 
     /**
+     * Join the given session.
+     *
+     * @param  proxy    Reference to view proxy object.
+     * @param  session  Session name.
+     *
+     * @exception IOException
+     *     Thrown if an I/O error occurred.
+     */
+    public void join (ViewProxy proxy, String session) throws IOException {}
+
+    /**
      * Clears the board of game pieces for a new games and resets the winning game line
      */
-    public void clearBoard () {
+    public synchronized void clearBoard () {
         gameBoard = new int[ROWS][COLS];
         winnerLine = null;
+        Iterator<ViewProxy> iter = viewProxies.iterator();
+        while (iter.hasNext())
+        {
+            ViewProxy listener = iter.next();
+            try
+            {
+                listener.boardCleared();
+            }
+            catch (IOException exc)
+            {
+                // Client failed, stop reporting to it.
+                iter.remove();
+            }
+        }
     }
 
     /**
@@ -137,37 +194,6 @@ public class C4Model implements C4BoardIntf {
         return false;
     }
 
-    /**
-     * Determine if the given row and column contains player 1's marker.
-     *
-     * @param  r  Row.
-     * @param  c  Column.
-     *
-     * @return  True if (r, c) contains player 1's marker, false otherwise.
-     */
-    public boolean hasPlayer1Marker (int r, int c) {
-        if (r < 0 || r >= ROWS || c < 0 || c >= COLS) {
-            return false;
-        } else if (gameBoard[r][c] == 1) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Determine if the given row and column contains player 2's marker.
-     *
-     * @param  r  Row.
-     * @param  c  Column.
-     *
-     * @return  True if (r, c) contains player 2's marker, false otherwise.
-     */
-    public boolean hasPlayer2Marker (int r, int c) {
-        if (r < 0 || r >= ROWS || c < 0 || c >= COLS) {
-            return false;
-        } else if (gameBoard[r][c] == 2) return true;
-        return false;
-    }
 
     /**
      * Determine if one player or the other has won; that is, has four markers
@@ -195,4 +221,15 @@ public class C4Model implements C4BoardIntf {
             this.c = c;
         }
     }
+
+    private class Player {
+        public String name;
+        public int num;
+
+        public Player (String name, int num) {
+            this.name = name;
+            this.num = num;
+        }
+    }
+
 }

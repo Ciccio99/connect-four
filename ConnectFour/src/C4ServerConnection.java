@@ -11,9 +11,9 @@ import java.net.SocketAddress;
  * @version 0.1.0
  */
 public class C4ServerConnection {
-    private Socket socket;
-    private BufferedReader in;
-    private PrintWriter out;
+    public Socket socket;
+    public DataInputStream in;
+    public DataOutputStream out;
 
     /**
      * C4ServerConnection constructor, accepts a host and port as parameters to create a socket connection
@@ -25,8 +25,8 @@ public class C4ServerConnection {
         SocketAddress sock_addr = new InetSocketAddress(host, port);
         socket = new Socket();
         socket.connect(sock_addr);
-        in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        out = new PrintWriter(socket.getOutputStream(), true);
+        in = new DataInputStream (socket.getInputStream());
+        out = new DataOutputStream (socket.getOutputStream());
     }
 
     /**
@@ -43,6 +43,7 @@ public class C4ServerConnection {
                 received_message = in.readLine();
             }
         }
+        System.out.println(received_message);
         return received_message;
     }
 
@@ -52,7 +53,6 @@ public class C4ServerConnection {
      * @throws Exception
      */
     public void sendMessage (String message) throws Exception {
-        out.println(message);
     }
 
     /**
