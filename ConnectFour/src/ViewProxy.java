@@ -81,6 +81,17 @@ public class ViewProxy
     }
 
     /**
+     * Informs player who's current turn it is
+     * @oaram playerNum current player's number
+     * */
+    public void playerTurn (int playerNum) throws IOException {
+        System.out.println ("MEOWMEOWMEO");
+        out.writeByte ('T');
+        out.writeByte (playerNum);
+        out.flush();
+    }
+
+    /**
      * Informs the player what number ID they are
      * @param playerNum number of player
      * */
@@ -88,6 +99,20 @@ public class ViewProxy
         System.out.println("Informing player of number");
         out.writeByte('I');
         out.writeByte(playerNum);
+        out.flush();
+    }
+
+    /**
+     * Informs the player of the newly joined player
+     * @param num player number.
+     * @param name player name
+     * */
+    public void informNewPlayer (int num, String name) throws IOException {
+        System.out.println("Informing of NEW PLAYER");
+
+        out.writeByte('N');
+        out.writeByte(num);
+        out.writeUTF(name);
         out.flush();
     }
 
@@ -133,9 +158,8 @@ public class ViewProxy
                                 break;
                             case 'A':
                                 playerNum = in.readByte();
-                                r = in.readByte();
                                 c = in.readByte();
-                                viewListener.addPlayerToken (playerNum, r, c);
+                                viewListener.addPlayerToken (playerNum, c);
                                 break;
                             case 'C':
                                 viewListener.clearBoard();

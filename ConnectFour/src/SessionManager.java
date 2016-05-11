@@ -86,16 +86,19 @@ public class SessionManager implements ViewListener {
         proxy.informPlayerNumber(playerNum);
         model.addProxy (proxy);
         proxy.setViewListener (model);
+        if (playerNum == 2) {
+            System.out.printf("Game started!\n");
+            model.initiateGame();
+        }
     }
 
     /**
      * Place a marker on the Go board.
      *
      * @param  playerNum The number of the player adding the token.
-     * @param  r      Row on which to place the marker.
      * @param  c      Column on which to place the marker.
      */
-    public void addPlayerToken (int playerNum, int r, int c) {}
+    public void addPlayerToken (int playerNum, int c) {}
 
     /**
      * Clear the Go board.

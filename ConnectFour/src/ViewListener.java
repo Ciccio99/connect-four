@@ -31,7 +31,7 @@ public interface ViewListener
      * @exception  IOException
      *     Thrown if an I/O error occurred.
      */
-    public void addPlayerToken (int playerNum, int r, int c) throws IOException;
+    public void addPlayerToken (int playerNum, int c) throws IOException;
 
     /**
      * Clear the Go board.

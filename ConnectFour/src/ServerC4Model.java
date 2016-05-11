@@ -21,6 +21,7 @@ public class ServerC4Model implements ViewListener {
 
     Player player1;
     Player player2;
+    Player currPlayerTurn;
 
     private LinkedList<ViewProxy> viewProxies =
             new LinkedList<ViewProxy>();
@@ -48,22 +49,16 @@ public class ServerC4Model implements ViewListener {
             player2 = new Player(name, num);
     }
 
-    /**
-     * Adds a player token on the game board
-     * @param playerNum Player number
-     * @param r Row
-     * @param c Column
-     */
-    public synchronized void addPlayerToken (int playerNum, int r, int c) {
-        gameBoard[r][c] = playerNum;
-        winnerLine = checkForWin(playerNum, r, c);
+    public synchronized void initiateGame () {
         Iterator<ViewProxy> iter = viewProxies.iterator();
         while (iter.hasNext())
         {
             ViewProxy listener = iter.next();
             try
             {
-                listener.playerTokenAdded(playerNum, r, c);
+                listener.informNewPlayer(player1.num, player1.name);
+                listener.informNewPlayer(player2.num, player2.name);
+                listener.playerTurn(player1.num);
             }
             catch (IOException exc)
             {
@@ -71,6 +66,44 @@ public class ServerC4Model implements ViewListener {
                 iter.remove();
             }
         }
+    }
+
+    /**
+     * Adds a player token on the game board
+     * @param playerNum Player number
+     * @param c Column
+     */
+    public synchronized void addPlayerToken (int playerNum, int c) {
+        if (!hasWon()) {
+            int r;
+            for (r = ROWS - 1; r < ROWS; r++) {
+                if (gameBoard[r][c] != 0) {
+                    r -= 1;
+                    break;
+                } else if (gameBoard[ROWS - 1][c] == 0) {
+                    r = ROWS - 1;
+                    break;
+                }
+            }
+
+            gameBoard[r][c] = playerNum;
+            winnerLine = checkForWin(playerNum, r, c);
+            Iterator<ViewProxy> iter = viewProxies.iterator();
+            while (iter.hasNext())
+            {
+                ViewProxy listener = iter.next();
+                try
+                {
+                    listener.playerTokenAdded(playerNum, r, c);
+                }
+                catch (IOException exc)
+                {
+                    // Client failed, stop reporting to it.
+                    iter.remove();
+                }
+            }
+        }
+
     }
 
     /**
@@ -204,8 +237,12 @@ public class ServerC4Model implements ViewListener {
      *
      * @return  Array of (r1, c1, r2, c2), or null.
      */
-    public int[] hasWon() {
-        return winnerLine;
+    public boolean hasWon() {
+        if (winnerLine != null) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

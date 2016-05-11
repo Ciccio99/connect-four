@@ -23,7 +23,8 @@ public class C4ViewController {
      */
     public void addPiece (int c) throws Exception {
         if (gameController.getCurrGameState() == C4Controller.GameState.PLAYER_TURN) {
-            gameController.sendGameMessage(C4Messages.ADD + " " + gameController.playerNum + " " + c);
+            //gameController.sendGameMessage(C4Messages.ADD + " " + gameController.playerNum + " " + c);
+            gameController.addPlayerToken(c);
         }
     }
 
@@ -32,6 +33,7 @@ public class C4ViewController {
      * @throws Exception
      */
     public void clearBoard () throws Exception {
-        gameController.sendGameMessage(C4Messages.CLEAR);
+        gameController.clearBoard();
+//        gameController.sendGameMessage(C4Messages.CLEAR);
     }
 }
