@@ -24,7 +24,6 @@ public interface ViewListener
     /**
      * Place a marker on the Go board.
      * @param  playerNum  Player Number
-     * @param  r      Row on which to place the marker.
      * @param  c      Column on which to place the marker.
      *
      *
@@ -40,4 +39,11 @@ public interface ViewListener
      *     Thrown if an I/O error occurred.
      */
     public void clearBoard() throws IOException;
+
+    /**
+     * Informs all players that the game session has ended
+     * @exception  IOException
+     *     Thrown if an I/O error occurred.
+     */
+    public void destroyGameSession () throws IOException;
 }

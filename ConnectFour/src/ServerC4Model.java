@@ -50,6 +50,7 @@ public class ServerC4Model implements ViewListener {
     }
 
     public synchronized void initiateGame () {
+        currPlayerTurn = player1;
         Iterator<ViewProxy> iter = viewProxies.iterator();
         while (iter.hasNext())
         {
@@ -76,25 +77,21 @@ public class ServerC4Model implements ViewListener {
     public synchronized void addPlayerToken (int playerNum, int c) {
         if (!hasWon()) {
             int r;
-            for (r = ROWS - 1; r < ROWS; r++) {
-                if (gameBoard[r][c] != 0) {
-                    r -= 1;
-                    break;
-                } else if (gameBoard[ROWS - 1][c] == 0) {
-                    r = ROWS - 1;
-                    break;
-                }
+            for (r = ROWS - 1; r > 0; r--) {
+                if (gameBoard[r][c] == 0) break;
             }
 
             gameBoard[r][c] = playerNum;
             winnerLine = checkForWin(playerNum, r, c);
             Iterator<ViewProxy> iter = viewProxies.iterator();
+            swapCurrentPlayerTurn();
             while (iter.hasNext())
             {
                 ViewProxy listener = iter.next();
                 try
                 {
                     listener.playerTokenAdded(playerNum, r, c);
+                    listener.playerTurn(currPlayerTurn.num);
                 }
                 catch (IOException exc)
                 {
@@ -103,7 +100,17 @@ public class ServerC4Model implements ViewListener {
                 }
             }
         }
+    }
 
+    /**
+     * Swap current players
+     * */
+    private synchronized void swapCurrentPlayerTurn () {
+        if (currPlayerTurn.num == 1) {
+            currPlayerTurn = player2;
+        } else {
+            currPlayerTurn = player1;
+        }
     }
 
     /**
@@ -180,6 +187,7 @@ public class ServerC4Model implements ViewListener {
     public synchronized void clearBoard () {
         gameBoard = new int[ROWS][COLS];
         winnerLine = null;
+        currPlayerTurn = player1;
         Iterator<ViewProxy> iter = viewProxies.iterator();
         while (iter.hasNext())
         {
@@ -187,6 +195,26 @@ public class ServerC4Model implements ViewListener {
             try
             {
                 listener.boardCleared();
+                listener.playerTurn(currPlayerTurn.num);
+            }
+            catch (IOException exc)
+            {
+                // Client failed, stop reporting to it.
+                iter.remove();
+            }
+        }
+    }
+
+    public synchronized void destroyGameSession () {
+        Iterator<ViewProxy> iter = viewProxies.iterator();
+        while (iter.hasNext())
+        {
+            ViewProxy listener = iter.next();
+            try
+            {
+                if (listener.socket.isConnected()) {
+                    listener.playerQuit();
+                }
             }
             catch (IOException exc)
             {

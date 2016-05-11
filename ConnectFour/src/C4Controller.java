@@ -133,6 +133,11 @@ public class C4Controller {
                         c = gameService.in.readByte();
                         processAddMessage(playerNum, r, c);
                         break;
+                    case 'Q':
+                        System.out.println("Other player left -  Quitting game.");
+                        gameService.socket.close();
+                        System.exit(0);
+                        break;
                     default:
                         System.err.println("Bad Message");
                         break;

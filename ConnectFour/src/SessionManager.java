@@ -36,8 +36,8 @@ import java.util.HashMap;
 public class SessionManager implements ViewListener {
 
 // Hidden data members.
-    private int waitingSessionId;
-    private boolean sessionWaiting;
+    public int waitingSessionId;
+    public boolean sessionWaiting;
     private HashMap<Integer,ServerC4Model> sessions = new HashMap<Integer,ServerC4Model>();
 
 
@@ -49,6 +49,15 @@ public class SessionManager implements ViewListener {
     public SessionManager () {
         waitingSessionId = 0;
         sessionWaiting = false;
+    }
+
+    public void killSession (int id) {
+
+        sessions.remove(id);
+        if (sessionWaiting) {
+            sessionWaiting = false;
+            waitingSessionId += 1;
+        }
     }
 
 // Exported operations.
@@ -83,8 +92,10 @@ public class SessionManager implements ViewListener {
             model.addPlayer(playerNum, playerName);
         }
         System.out.printf("Session begin filled: %d\n", session);
+        proxy.setSessionId(session);
         proxy.informPlayerNumber(playerNum);
         model.addProxy (proxy);
+        proxy.setManagerReference(this);
         proxy.setViewListener (model);
         if (playerNum == 2) {
             System.out.printf("Game started!\n");
@@ -105,4 +116,10 @@ public class SessionManager implements ViewListener {
      */
     public void clearBoard() {}
 
-}
+    /**
+     * Destroy game session
+     * */
+    public synchronized void destroyGameSession () {}
+
+
+    }

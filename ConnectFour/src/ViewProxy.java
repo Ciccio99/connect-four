@@ -17,10 +17,12 @@ public class ViewProxy
 
 // Hidden data members.
 
-    private Socket socket;
+    public Socket socket;
     private DataOutputStream out;
     private DataInputStream in;
     private ViewListener viewListener;
+    private int mySessionId;
+    private SessionManager managerReference;
 
 // Exported constructors.
 
@@ -60,6 +62,14 @@ public class ViewProxy
         {
             this.viewListener = viewListener;
         }
+    }
+
+    public void setManagerReference (SessionManager manager) {
+        this.managerReference = manager;
+    }
+
+    public void setSessionId (int id) {
+        this.mySessionId = id;
     }
 
 
@@ -127,6 +137,20 @@ public class ViewProxy
         out.flush();
     }
 
+    /**
+     * Informs that a player has quit and the connections should disconnect
+     * @exception  IOException
+     *     Thrown if an I/O error occurred.
+     * */
+    public void playerQuit () throws IOException {
+        System.out.println("Other player left");
+        out.writeByte('Q');
+        out.flush();
+        socket.close();
+        managerReference.killSession(mySessionId);
+    }
+
+
 // Hidden helper classes.
 
     /**
@@ -145,11 +169,13 @@ public class ViewProxy
             {
                 for (;;)
                 {
-                    if (socket.isConnected()) {
+                    if (!socket.isClosed()) {
                         String playerName;
-                        int playerNum, r, c;
-                        byte b = in.readByte();
-                        switch (b)
+                        int playerNum, c;
+                        byte[] b = new byte[1];
+                        in.read(b);
+                        System.out.printf("WHAT THE BYTE READ %d\n", b[0]);
+                        switch (b[0])
                         {
                             case 'J':
                                 playerName = in.readUTF();
@@ -164,10 +190,17 @@ public class ViewProxy
                             case 'C':
                                 viewListener.clearBoard();
                                 break;
+                            case 0:
+                                System.out.println("Dude left game");
+                                viewListener.destroyGameSession();
+                                socket.close();
+                                break;
                             default:
                                 System.err.println ("Bad message");
                                 break;
                         }
+                    } else {
+                        break;
                     }
                 }
             }
@@ -178,7 +211,9 @@ public class ViewProxy
             {
                 try
                 {
-                    socket.close();
+                    if (socket.isConnected()) {
+                        socket.close();
+                    }
                 }
                 catch (IOException exc)
                 {
