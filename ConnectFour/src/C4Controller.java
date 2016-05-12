@@ -108,33 +108,27 @@ public class C4Controller {
                 switch (srvrMsg) {
                     case 'I':
                         playerNum = gameService.in.readByte();
-                        System.out.printf("I've been informed of number! Number: %d\n", playerNum);
                         processNumberMessage(playerNum);
                         break;
                     case 'C':
-                        System.out.println("Clear ya board");
                         processClearMessage();
                         break;
                     case 'T':
-                        System.out.println("Who's Turn is it?");
                         playerNum = gameService.in.readByte();
                         processTurnMessage(playerNum);
                         break;
                     case 'N':
                         playerNum = gameService.in.readByte();
                         playerName = gameService.in.readUTF();
-                        System.out.printf("Number and name info %s\n", playerName);
                         processNameMessage(playerName);
                         break;
                     case 'A':
-                        System.out.println("Adding piece");
                         playerNum = gameService.in.readByte();
                         r = gameService.in.readByte();
                         c = gameService.in.readByte();
                         processAddMessage(playerNum, r, c);
                         break;
                     case 'Q':
-                        System.out.println("Other player left -  Quitting game.");
                         gameService.socket.close();
                         System.exit(0);
                         break;
@@ -144,13 +138,12 @@ public class C4Controller {
                 }
             }
         } catch (IOException e) {
-            System.err.println(e);
+            System.err.println("Connection Error: Terminating client session.");
         } finally {
             try {
-                System.out.println("I MADE IT HERE SOMEHOW");
                 gameService.closeConnection();
             } catch (IOException e) {
-                System.err.println(e);
+                System.err.println("Close Connection Error: Remain calm and carry on.");
             }
         }
         System.exit(1);

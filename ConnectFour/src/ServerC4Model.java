@@ -2,7 +2,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.*;
 /**
- * Created by alberto on 5/10/16.
+ * Main connect four model that maintains the current state of the game board on the server.
+ *
+ * @author  Alberto Scicali
  */
 public class ServerC4Model implements ViewListener {
     /**
@@ -14,15 +16,11 @@ public class ServerC4Model implements ViewListener {
      * Number of columns.
      */
     private static final int COLS = 7;
-
     private int gameBoard[][];
-
     private int[] winnerLine;
-
     Player player1;
     Player player2;
     Player currPlayerTurn;
-
     private LinkedList<ViewProxy> viewProxies =
             new LinkedList<ViewProxy>();
 
@@ -42,6 +40,11 @@ public class ServerC4Model implements ViewListener {
         viewProxies.add (proxy);
     }
 
+    /**
+     * Instantiates new Player objects with the given player names and numbers
+     * @param num the player number
+     * @param name the player name
+     * */
     public synchronized void addPlayer (int num, String name) {
         if (num == 1)
             player1 = new Player(name, num);
@@ -49,6 +52,9 @@ public class ServerC4Model implements ViewListener {
             player2 = new Player(name, num);
     }
 
+    /**
+     * Initiates the game and informs the players with info about the opposite player and who's turn it is.
+     * */
     public synchronized void initiateGame () {
         currPlayerTurn = player1;
         Iterator<ViewProxy> iter = viewProxies.iterator();
@@ -75,7 +81,7 @@ public class ServerC4Model implements ViewListener {
      * @param c Column
      */
     public synchronized void addPlayerToken (int playerNum, int c) {
-        if (!hasWon()) {
+        if (!hasWon() && !isColFull(c)) {
             int r;
             for (r = ROWS - 1; r > 0; r--) {
                 if (gameBoard[r][c] == 0) break;
@@ -100,6 +106,20 @@ public class ServerC4Model implements ViewListener {
                 }
             }
         }
+    }
+
+    /**
+     * Checks if the given game board column is completely filled with token or not
+     * @param c The column tot check
+     * @return true if filled, false otherwise
+     * */
+    private boolean isColFull (int c) {
+        for (int r = 0; r < ROWS; r++) {
+            if (gameBoard[r][c] == 0) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -205,6 +225,9 @@ public class ServerC4Model implements ViewListener {
         }
     }
 
+    /**
+     * Informs the players the the game session is over and then closes the socket connection for this listener.
+     * */
     public synchronized void destroyGameSession () {
         Iterator<ViewProxy> iter = viewProxies.iterator();
         while (iter.hasNext())
@@ -222,21 +245,6 @@ public class ServerC4Model implements ViewListener {
                 iter.remove();
             }
         }
-    }
-
-    /**
-     * Checks if the entire board has been filled up, preventing players from continuing the game
-     * @return true if filled, false otherwise
-     */
-    public boolean checkForBoardFill() {
-        for (int r = 0; r < ROWS; r++) {
-            for (int c = 0; c < COLS; c++) {
-                if (gameBoard[r][c] == 0) {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 
     /**
@@ -287,10 +295,19 @@ public class ServerC4Model implements ViewListener {
         }
     }
 
+    /**
+     * Player class
+     * Holds all the information about player, including name and number
+     * */
     private class Player {
         public String name;
         public int num;
 
+        /**
+         * Player object constructor
+         * @param name Player namer
+         * @param num player number
+         * */
         public Player (String name, int num) {
             this.name = name;
             this.num = num;

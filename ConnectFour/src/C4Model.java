@@ -3,8 +3,7 @@ import java.util.ArrayList;
 /**
  * Main connect four model that maintains the current state of the game board.
  *
- * @author  Alan Kaminsky
- * @version 13-Oct-2014
+ * @author  Alberto Scicali
  */
 public class C4Model implements C4BoardIntf {
 

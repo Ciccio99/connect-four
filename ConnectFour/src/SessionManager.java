@@ -31,6 +31,7 @@ import java.util.HashMap;
  * Game server.
  *
  * @author  Alan Kaminsky
+ * @author Alberto Scicali
  * @version 21-Jan-2010
  */
 public class SessionManager implements ViewListener {
@@ -51,6 +52,10 @@ public class SessionManager implements ViewListener {
         sessionWaiting = false;
     }
 
+    /**
+     * Removes the given session id from the HashMap of session
+     * @param id the session ID
+     * */
     public void killSession (int id) {
 
         sessions.remove(id);
@@ -91,14 +96,12 @@ public class SessionManager implements ViewListener {
             playerNum = 2;
             model.addPlayer(playerNum, playerName);
         }
-        System.out.printf("Session begin filled: %d\n", session);
         proxy.setSessionId(session);
         proxy.informPlayerNumber(playerNum);
         model.addProxy (proxy);
         proxy.setManagerReference(this);
         proxy.setViewListener (model);
         if (playerNum == 2) {
-            System.out.printf("Game started!\n");
             model.initiateGame();
         }
     }

@@ -3,14 +3,14 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 /**
- * Class GoServer is the server main program for the Network Go Game. The
+ * Class C4Server is the server main program for the Network C4 Game. The
  * command line arguments specify the host and port to which the server should
  * listen for connections.
  * <P>
- * Usage: java GoServer <I>host</I> <I>port</I>
+ * Usage: java C4Server <I>host</I> <I>port</I>
  *
  * @author  Alan Kaminsky
- * @version 21-Jan-2010
+ * @author Alberto Scicali
  */
 public class C4Server
 {
@@ -40,7 +40,7 @@ public class C4Server
      */
     private static void usage()
     {
-        System.err.println ("Usage: java GoServer <host> <port>");
+        System.err.println ("Usage: java C4Server <host> <port>");
         System.exit (1);
     }
 

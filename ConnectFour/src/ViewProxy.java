@@ -1,4 +1,3 @@
-import java.awt.Color;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -6,11 +5,11 @@ import java.net.Socket;
 
 /**
  * Class ViewProxy provides the network proxy for the view object in the Network
- * Go Game. The view proxy resides in the server program and communicates with
+ * C4 Game. The view proxy resides in the server program and communicates with
  * the client program.
  *
  * @author  Alan Kaminsky
- * @version 21-Jan-2010
+ * @author Alberto Scicali
  */
 public class ViewProxy
 {
@@ -64,10 +63,18 @@ public class ViewProxy
         }
     }
 
+    /**
+     * Sets the reference to the SessionManager
+     * @param manager the SessionManager
+     * */
     public void setManagerReference (SessionManager manager) {
         this.managerReference = manager;
     }
 
+    /**
+     * Sets the current session ID
+     * @param id The session ID
+     * */
     public void setSessionId (int id) {
         this.mySessionId = id;
     }
@@ -95,7 +102,6 @@ public class ViewProxy
      * @oaram playerNum current player's number
      * */
     public void playerTurn (int playerNum) throws IOException {
-        System.out.println ("MEOWMEOWMEO");
         out.writeByte ('T');
         out.writeByte (playerNum);
         out.flush();
@@ -106,7 +112,6 @@ public class ViewProxy
      * @param playerNum number of player
      * */
     public void informPlayerNumber (int playerNum) throws IOException {
-        System.out.println("Informing player of number");
         out.writeByte('I');
         out.writeByte(playerNum);
         out.flush();
@@ -118,8 +123,6 @@ public class ViewProxy
      * @param name player name
      * */
     public void informNewPlayer (int num, String name) throws IOException {
-        System.out.println("Informing of NEW PLAYER");
-
         out.writeByte('N');
         out.writeByte(num);
         out.writeUTF(name);
@@ -143,7 +146,6 @@ public class ViewProxy
      *     Thrown if an I/O error occurred.
      * */
     public void playerQuit () throws IOException {
-        System.out.println("Other player left");
         out.writeByte('Q');
         out.flush();
         socket.close();
@@ -174,12 +176,10 @@ public class ViewProxy
                         int playerNum, c;
                         byte[] b = new byte[1];
                         in.read(b);
-                        System.out.printf("WHAT THE BYTE READ %d\n", b[0]);
                         switch (b[0])
                         {
                             case 'J':
                                 playerName = in.readUTF();
-                                System.out.println(playerName);
                                 viewListener.join (ViewProxy.this, playerName);
                                 break;
                             case 'A':
@@ -191,7 +191,6 @@ public class ViewProxy
                                 viewListener.clearBoard();
                                 break;
                             case 0:
-                                System.out.println("Dude left game");
                                 viewListener.destroyGameSession();
                                 socket.close();
                                 break;
